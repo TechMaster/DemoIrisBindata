@@ -11,3 +11,21 @@ Demo [bindata](https://github.com/kataras/bindata) to embed static resources int
 The problem is
 ```app.StaticEmbeddedGzip("/", "./assets/", GzipAsset, GzipAssetNames)``` does not render default index.html
 inside embedded asset folder
+
+## Updated!
+
+I work around by rendering index.html manually from embedded asset when app receive request "/"
+Chrome, FireFox render correctly but Safary fails !
+```go
+app.Get("/", func (ctx iris.Context) {
+    if data, err := GzipAsset("assets/index.html"); err != nil {
+        ctx.StatusCode(http.StatusInternalServerError)
+        ctx.WriteString("index.html is not found")
+        return
+    } else {
+        ctx.StatusCode(http.StatusOK)
+        ctx.Header("Content-Encoding", "gzip")
+        ctx.ContentType("text/html")
+        ctx.WriteGzip(data)
+    }})
+```
